@@ -1,12 +1,24 @@
 {
   "players": [
     {
-      "name": "Player 1",
-      "pushUps": 100
+      "id": 1,
+      "name": "Devon",
+      "pushUps": 0
     },
     {
-      "name": "Player 2",
-      "pushUps": 200
+      "id": 2,
+      "name": "Ruan",
+      "pushUps": 0
+    },
+    {
+      "id": 3,
+      "name": "Cariece",
+      "pushUps": 0
+    },
+    {
+      "id": 4,
+      "name": "Anri",
+      "pushUps": 0
     }
   ]
 }

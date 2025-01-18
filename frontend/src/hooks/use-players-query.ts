@@ -4,7 +4,7 @@ import {Player} from "../entities/player.ts";
 export function usePlayersQuery() {
     return useQuery({
         queryKey: ["players"],
-        queryFn: async () => await fetchPlayers(),
+        queryFn: fetchPlayers,
         throwOnError: true
     });
 }

@@ -1,14 +1,13 @@
-import {useState} from "react";
+import { useState } from "react";
 import _ from "lodash";
-import {usePlayersQuery} from "../hooks/use-players-query.ts";
-import {Leaderboard} from "../entities/leaderboard.ts";
-import {PlayerComponent} from "./PlayerComponent.tsx";
-import {usePlayersMutation} from "../hooks/use-player-mutations.ts";
+import { usePlayersQuery } from "../hooks/use-players-query.ts";
+import { Leaderboard } from "../entities/leaderboard.ts";
+import { PlayerComponent } from "./PlayerComponent.tsx";
 
 export function LeaderboardComponent() {
-    const [leaderboard] = useState(setLeaderBoard());
+    const [leaderboard] = useState(init());
 
-    function setLeaderBoard() {
+    function init() {
         return {
             name: "Push-up Leaderboard",
             players: []
@@ -16,7 +15,6 @@ export function LeaderboardComponent() {
     }
 
     const {data: players, isLoading: isPlayersLoading} = usePlayersQuery();
-    const mutation = usePlayersMutation();
 
     if (players) {
         leaderboard.players = players;
@@ -40,7 +38,6 @@ export function LeaderboardComponent() {
     return (
         <>
             <h1>{leaderboard.name}</h1>
-            <button onClick={() => mutation.mutate(leaderboard.players)}>Update JSON</button>
             <table>
                 <thead>
                 <tr>
