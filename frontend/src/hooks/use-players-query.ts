@@ -4,7 +4,7 @@ import {Player} from "../entities/player.ts";
 export function usePlayersQuery() {
     return useQuery({
         queryKey: ["players"],
-        queryFn: async () => await fetchPlayers(),
+        queryFn: fetchPlayers,
         throwOnError: true
     });
 }
@@ -17,5 +17,5 @@ async function fetchPlayers() {
     }
 
     const data = await response.json();
-    return data.players as Player[];
+    return data as Player[];
 }

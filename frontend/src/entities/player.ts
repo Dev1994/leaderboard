@@ -1,11 +1,11 @@
 export class Player {
-    public id: number;
+    public id: string;
     public name: string;
-    public pushUps: number;
+    public totalPushUps: number;
 
-    constructor(name: string, pushUps: number) {
-        this.id = Math.floor(Math.random() * 1000);
+    constructor(id: string, name: string, pushUps: number) {
+        this.id = id;
         this.name = name;
-        this.pushUps = pushUps;
+        this.totalPushUps = pushUps;
     }
 }
