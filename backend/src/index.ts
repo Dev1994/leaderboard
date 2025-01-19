@@ -16,37 +16,52 @@ app.use((_: any, res: any, next: any) => {
     next();
 });
 
+const writeQueue: (() => Promise<void>)[] = [];
+
 app.get("/", (_: Request, res: Response) => {
-    res.send("Healthy");
+    res.send(200);
 });
 
 app.get("/players", (_: Request, res: Response) => {
     res.send(data);
 });
 
-app.put("/players/add-push-up/:id", (req: Request, res: Response) => {
-    let player = data.players.find((p: Player) => p.id === Number.parseInt(req.params["id"]));
+function processQueue() {
+    if (writeQueue.length === 0) return;
 
-    if (!player) {
-        res.send("Player not found");
-        return;
+    const writeTask = writeQueue.shift();
+    if (writeTask) {
+        writeTask().then(() => processQueue());
     }
+}
 
-    data.players = data.players.map((p: Player) => {
-        if (p.id === player.id) {
-            player.pushUps += 1;
-            return player;
+app.put("/players/add-push-up/:id", (req: Request, res: Response) => {
+    const writeTask = async () => {
+        let player = data.players.find((p: Player) => p.id === Number.parseInt(req.params["id"]));
+
+        if (!player) {
+            res.send("Player not found");
+            return;
         }
 
-        return p;
-    });
+        data.players = data.players.map((p: Player) => {
+            if (p.id === player.id) {
+                player.pushUps += 1;
+                return player;
+            }
+            return p;
+        });
 
-    try {
-        fs.writeFileSync("./src/assets/data.json", JSON.stringify(data));
-        res.send("OK");
-    } catch (error) {
-        res.send("Error");
-    }
+        try {
+            await fs.promises.writeFile("./src/assets/data.json", JSON.stringify(data));
+            res.send(200);
+        } catch (error) {
+            res.status(500).send("Error writing to file");
+        }
+    };
+
+    writeQueue.push(writeTask);
+    if (writeQueue.length === 1) processQueue();
 });
 
 app.listen(port, () => {

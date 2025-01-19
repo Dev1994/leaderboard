@@ -7,8 +7,18 @@ export function useIncrementPlayerPushUpMutation() {
     return useMutation({
         mutationKey: ["player"],
         mutationFn: incrementPushUp,
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: ["players"]});
+        onSuccess: async (player: Player) => {
+            queryClient.setQueryData(["players"], (oldPlayers: Player[]) => {
+                return oldPlayers.map((p: Player) => {
+                    if (player.id === p.id) {
+                        return {
+                            ...p,
+                            pushUps: p.pushUps + 1
+                        } as Player;
+                    }
+                    return p;
+                });
+            });
         },
         onError: (error) => {
             console.error("Error incrementing push-up", error);
@@ -17,10 +27,16 @@ export function useIncrementPlayerPushUpMutation() {
 }
 
 async function incrementPushUp(player: Player) {
-    return await fetch(`http://localhost:3002/players/add-push-up/${player.id}`, {
+    const response = await fetch(`http://localhost:3002/players/add-push-up/${player.id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
         }
     });
+
+    if (response.status !== 200) {
+        throw new Error("Failed to increment push-up");
+    }
+
+    return player;
 }
