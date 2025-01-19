@@ -1,94 +1,59 @@
-import express, { Request, Response } from 'express';
-import { Player } from "./DTOs/player";
-import * as fs from "node:fs";
+import express, {Request, Response} from 'express';
+import {databaseService} from "./database/database-service";
 
-// Define the path to the data file
-const dataFilePath = "./assets/data.json";  // Adjust this to where the file is expected to be
+const app = express();
+const port = process.env.PORT || 3002;
 
-// Function to check if the file can be accessed
-async function checkFileAccess(filePath: string): Promise<boolean> {
-    try {
-        await fs.promises.access(filePath, fs.constants.F_OK | fs.constants.R_OK | fs.constants.W_OK);
-        console.log(`File ${filePath} is accessible for reading and writing.`);
-        return true;
-    } catch (error) {
-        console.error(`Error accessing file ${filePath}:`, error);
-        return false;
-    }
-}
+databaseService.connect();
+databaseService.defineModels();
+databaseService.sync();
 
-(async () => {
-    // Check if the data.json file can be accessed on startup
-    const fileIsAccessible = await checkFileAccess(dataFilePath);
+app.use(express.json())
 
-    if (!fileIsAccessible) {
-        console.error("Unable to access data.json. Please check permissions and file path.");
-    }
+app.use((_: any, res: any, next: any) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
-    // Proceed with the rest of the application if the file is accessible
-    const app = express();
-    const port = process.env.PORT || 3000;
+app.get("/", (_: Request, res: Response) => {
+    res.send("Healthy");
+});
 
-    app.use(express.json());
+app.get("/players", async (_: Request, res: Response) => {
+    const players = await databaseService.getPlayers();
+    console.log(players);
+    res.send(players);
+});
 
-    app.use((_: any, res: any, next: any) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-        res.header('Access-Control-Allow-Headers', 'Content-Type');
-        next();
-    });
+app.post("/players/add/:name", async (req: Request, res: Response) => {
+    let name = req.params["name"] as string;
 
-    let data = require(dataFilePath);
+    const player = await databaseService.addPlayer(name);
+    res.send(player);
+});
 
-    const writeQueue: (() => Promise<void>)[] = [];
+app.delete("/players/remove/:id", async (req: Request, res: Response) => {
+    let id = req.params["id"] as string;
 
-    app.get("/", (_: Request, res: Response) => {
-        res.send(200);
-    });
+    await databaseService.removePlayer(id);
+    res.send("OK");
+});
 
-    app.get("/players", (_: Request, res: Response) => {
-        res.send(data);
-    });
+app.post("/workouts/add/:playerId/:pushUps", async (req: Request, res: Response) => {
+    let playerId = req.params["playerId"] as string;
+    let pushUps = parseInt(req.params["pushUps"] as string);
 
-    function processQueue() {
-        if (writeQueue.length === 0) return;
-
-        const writeTask = writeQueue.shift();
-        if (writeTask) {
-            writeTask().then(() => processQueue());
-        }
+    const player = await databaseService.getPlayerById(playerId);
+    if (!player) {
+        res.status(404).send("Player not found");
     }
 
-    app.put("/players/add-push-up/:id", (req: Request, res: Response) => {
-        const writeTask = async () => {
-            let player = data.players.find((p: Player) => p.id === Number.parseInt(req.params["id"]));
+    let updated = await databaseService.addWorkout(player, pushUps);
+    res.send(updated);
+});
 
-            if (!player) {
-                res.send("Player not found");
-                return;
-            }
-
-            data.players = data.players.map((p: Player) => {
-                if (p.id === player.id) {
-                    player.pushUps += 1;
-                    return player;
-                }
-                return p;
-            });
-
-            try {
-                await fs.promises.writeFile(dataFilePath, JSON.stringify(data));
-                res.send(200);
-            } catch (error) {
-                res.status(500).send("Error writing to file");
-            }
-        };
-
-        writeQueue.push(writeTask);
-        if (writeQueue.length === 1) processQueue();
-    });
-
-    app.listen(port, () => {
-        console.log(`Server running at http://localhost:${port}`);
-    });
-})();
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});

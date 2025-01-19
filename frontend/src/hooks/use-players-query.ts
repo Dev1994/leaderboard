@@ -17,5 +17,5 @@ async function fetchPlayers() {
     }
 
     const data = await response.json();
-    return data.players as Player[];
+    return data as Player[];
 }
