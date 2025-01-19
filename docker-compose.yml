@@ -1,6 +1,21 @@
-version: '3.8'
-
 services:
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssw0rd
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+    restart: always
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   backend:
     build:
       context: ./backend
@@ -8,19 +23,19 @@ services:
       NODE_ENV: production
     ports:
       - "3002:3000"
+    depends_on:
+      database:
+        condition: service_healthy
     restart: always
-    volumes:
-      - data:/app/dist/assets
 
   push-ups-leaderboard:
     build:
-     context: ./frontend
-     dockerfile: Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: production
     ports:
       - "3001:3000"
 
 volumes:
-  data:
-    driver: local
+  postgres-data:

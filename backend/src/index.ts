@@ -2,7 +2,7 @@ import express, {Request, Response} from 'express';
 import {databaseService} from "./database/database-service";
 
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3000;
 
 databaseService.connect();
 databaseService.defineModels();

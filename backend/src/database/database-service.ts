@@ -5,7 +5,8 @@ class DatabaseService {
 
     constructor() {
         this.sequelize = new Sequelize("Leaderboard", "postgres", "P@ssw0rd", {
-            host: "localhost", // TODO: Use environment variables.
+            host: "database", // TODO: Use environment variables.
+            port: 5432,
             dialect: "postgres",
             pool: {
                 max: 5,
@@ -19,7 +20,7 @@ class DatabaseService {
         try {
             await this.sequelize.authenticate();
         } catch (error) {
-            throw new Error("Failed to connect to the database");
+            throw error;
         }
     }
 
