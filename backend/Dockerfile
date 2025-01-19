@@ -30,7 +30,6 @@ COPY --from=build /app/dist ./dist
 
 # Copy the necessary runtime files (package.json, data.json, etc.)
 COPY --from=build /app/package*.json ./
-COPY --from=build /app/src/assets/data.json ./dist/assets/data.json
 
 # Install only production dependencies
 RUN npm install --only=production
