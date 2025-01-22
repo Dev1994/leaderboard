@@ -17,6 +17,7 @@ export function useAddWorkoutMutation() {
                     return oldPlayer;
                 });
             });
+            queryClient.setQueryData(["player", updatedPlayer.id], updatedPlayer);
         },
         onError: (error) => {
             console.error("Error incrementing push-up", error);

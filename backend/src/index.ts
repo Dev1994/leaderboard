@@ -23,8 +23,19 @@ app.get("/", (_: Request, res: Response) => {
 
 app.get("/players", async (_: Request, res: Response) => {
     const players = await databaseService.getPlayers();
-    console.log(players);
     res.send(players);
+});
+
+app.get("/players/:id", async (req: Request, res: Response) => {
+    let id = req.params["id"] as string;
+    const players = await databaseService.getPlayerById(id);
+    res.send(players);
+});
+
+app.get("/players/:id/workouts", async (req: Request, res: Response) => {
+    let id = req.params["id"] as string;
+    const workouts = await databaseService.getPlayerWorkouts(id);
+    res.send(workouts);
 });
 
 app.post("/players/add/:name", async (req: Request, res: Response) => {

@@ -1,13 +1,13 @@
-import {useState} from "react";
-import {usePlayersQuery} from "../hooks/use-players-query.ts";
-import {useAddPlayerMutation} from "../hooks/use-add-player-mutation.ts";
-import {useNavigate} from "react-router";
-import {Column} from "primereact/column";
-import {DataTable} from "primereact/datatable";
+import { useState } from "react";
+import { usePlayersQuery } from "../hooks/use-players-query.ts";
+import { useAddPlayerMutation } from "../hooks/use-add-player-mutation.ts";
+import { useNavigate } from "react-router";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
 import _ from "lodash";
-import {InputText} from "primereact/inputtext";
-import {Button} from "primereact/button";
-import {Fieldset} from "primereact/fieldset";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { Fieldset } from "primereact/fieldset";
 
 export function LeaderboardComponent() {
     const [playerName, setPlayerName] = useState<string>("");
@@ -17,7 +17,7 @@ export function LeaderboardComponent() {
     const {data: players, isLoading: isPlayersLoading} = usePlayersQuery();
 
     return (
-        <>
+        <div className="flex flex-col space-y-4">
             <Fieldset legend={"Push-ups leaderboard"}>
                 <DataTable
                     value={_.orderBy(players, ['totalPushUps'], ['desc'])}
@@ -37,6 +37,6 @@ export function LeaderboardComponent() {
                     <Button label="Add Player" onClick={() => addPlayerMutation.mutate(playerName)}/>
                 </div>
             </Fieldset>
-        </>
+        </div>
     )
 }

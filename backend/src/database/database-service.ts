@@ -93,6 +93,14 @@ class DatabaseService {
         }
     }
 
+    async getPlayerWorkouts(id: string) {
+        try {
+            return await this.sequelize.models.Workout.findAll({where: {playerId: id}});
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async addPlayer(name: string) {
         try {
             return await this.sequelize.models.Player.create({name, totalPushUps: 0});
