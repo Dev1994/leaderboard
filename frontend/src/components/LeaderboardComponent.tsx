@@ -1,65 +1,42 @@
-import * as React from "react";
 import {useState} from "react";
-import _ from "lodash";
 import {usePlayersQuery} from "../hooks/use-players-query.ts";
-import {Leaderboard} from "../entities/leaderboard.ts";
-import {PlayerComponent} from "./PlayerComponent.tsx";
 import {useAddPlayerMutation} from "../hooks/use-add-player-mutation.ts";
+import {useNavigate} from "react-router";
+import {Column} from "primereact/column";
+import {DataTable} from "primereact/datatable";
+import _ from "lodash";
+import {InputText} from "primereact/inputtext";
+import {Button} from "primereact/button";
+import {Fieldset} from "primereact/fieldset";
 
 export function LeaderboardComponent() {
-    const [leaderboard] = useState(init());
     const [playerName, setPlayerName] = useState<string>("");
+    const navigate = useNavigate();
 
     const addPlayerMutation = useAddPlayerMutation();
-
-    function init() {
-        return {
-            name: "Push-up Leaderboard",
-            players: []
-        } as Leaderboard;
-    }
-
     const {data: players, isLoading: isPlayersLoading} = usePlayersQuery();
-
-    if (players) {
-        leaderboard.players = players;
-    }
-
-    function renderRows() {
-        leaderboard.players = _.orderBy(leaderboard.players, ['totalPushUps'], ['desc']);
-
-        return leaderboard.players.map((player, index) => (
-            <tr key={index}>
-                <td>{index + 1}</td>
-                <PlayerComponent player={player}/>
-            </tr>
-        ));
-    }
-
-    if (isPlayersLoading) {
-        return <h1>Loading...</h1>;
-    }
 
     return (
         <>
-            <h1>{leaderboard.name}</h1>
-            <table>
-                <thead>
-                <tr>
-                    <th>Position</th>
-                    <th>Player</th>
-                    <th>Push-ups</th>
-                </tr>
-                </thead>
-                <tbody>
-                {renderRows()}
-                </tbody>
-            </table>
+            <Fieldset legend={"Push-ups leaderboard"}>
+                <DataTable
+                    value={_.orderBy(players, ['totalPushUps'], ['desc'])}
+                    selectionMode="single"
+                    loading={isPlayersLoading}
+                    onSelectionChange={(e) => navigate(`/player/${e.value.id}`)}>
+                    <Column header="Position" body={(_, options) => options.rowIndex + 1}></Column>
+                    <Column field="name" header="Name"></Column>
+                    <Column field="totalPushUps" header="Push ups"></Column>
+                </DataTable>
+            </Fieldset>
 
-            <h3>Add Player</h3>
-            <input type="text" placeholder="Player Name" value={playerName}
-                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPlayerName(event.target.value)}/>
-            <button onClick={() => addPlayerMutation.mutate(playerName)}>Add Player</button>
+            <Fieldset legend={"Add player"}>
+                <div className="p-inputgroup flex-1">
+                    <InputText placeholder="Name" value={playerName}
+                               onChange={(event) => setPlayerName(event.target.value)}/>
+                    <Button label="Add Player" onClick={() => addPlayerMutation.mutate(playerName)}/>
+                </div>
+            </Fieldset>
         </>
     )
 }

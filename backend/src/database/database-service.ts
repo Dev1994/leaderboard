@@ -5,7 +5,7 @@ class DatabaseService {
 
     constructor() {
         this.sequelize = new Sequelize("Leaderboard", "postgres", "P@ssw0rd", {
-            host: "database", // TODO: Use environment variables.
+            host: "localhost", // TODO: Use environment variables.
             port: 5432,
             dialect: "postgres",
             pool: {
