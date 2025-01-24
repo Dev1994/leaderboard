@@ -117,13 +117,12 @@ class DatabaseService {
         }
     }
 
-    // TODO: Not a fan of the any type here.
     async addWorkout(player: any, pushUps: number) {
         try {
-            await this.sequelize.models.Workout.create({date: new Date(), pushUps, playerId: player.id});
+            const workout = await this.sequelize.models.Workout.create({date: new Date(), pushUps, playerId: player.id});
             player.totalPushUps += pushUps;
             await player.save();
-            return player;
+            return workout;
         } catch (error) {
             throw error;
         }

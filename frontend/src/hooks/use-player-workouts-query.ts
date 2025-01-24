@@ -21,8 +21,7 @@ async function fetchPlayerWorkouts(player?: Player): Promise<Workout[]> {
     const data = await response.json();
     return data.map((workout: Workout) => {
         return {
-            ...workout,
-            createdAt: new Date(workout.createdAt).toLocaleString()
+            ...workout
         };
     }) as Workout[];
 }

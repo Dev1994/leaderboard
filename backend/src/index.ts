@@ -61,8 +61,8 @@ app.post("/workouts/add/:playerId/:pushUps", async (req: Request, res: Response)
         res.status(404).send("Player not found");
     }
 
-    let updated = await databaseService.addWorkout(player, pushUps);
-    res.send(updated);
+    let addedWorkout = await databaseService.addWorkout(player, pushUps);
+    res.send(addedWorkout);
 });
 
 app.listen(port, () => {

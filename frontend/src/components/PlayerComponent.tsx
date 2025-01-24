@@ -9,15 +9,12 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { usePlayerWorkoutsQuery } from "../hooks/use-player-workouts-query.ts";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { Workout } from "../entities/workout.ts";
+import { DateTime } from "luxon";
 
 export function PlayerComponent() {
     const {id} = useParams();
     const [pushUps, setPushUps] = useState<number>(0);
-
-    const columns = [
-        {field: 'pushUps', header: 'Push-ups'},
-        {field: 'createdAt', header: 'Created At'},
-    ];
 
     const {data: player, isLoading: isPlayerLoading} = usePlayerQuery(id as string);
     const {data: playerWorkouts, isLoading: isPlayerWorkoutsLoading} = usePlayerWorkoutsQuery(player);
@@ -30,6 +27,19 @@ export function PlayerComponent() {
 
     if (!player || !playerWorkouts) {
         return <div>Player not found</div>
+    }
+
+    function formatDate(workout: Workout) {
+        return DateTime.fromISO(workout.createdAt).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
+    }
+
+    function addPushUps() {
+        if (!player) {
+            return;
+        }
+
+        addWorkout({player, pushUps});
+        setPushUps(0);
     }
 
     return (
@@ -51,13 +61,12 @@ export function PlayerComponent() {
                 decrementButtonIcon="pi pi-minus"
                 mode="decimal"/>
 
-            <Button label="Add push-ups" onClick={() => addWorkout({player, pushUps})}/>
+            <Button label="Add push-ups" disabled={pushUps < 1} onClick={addPushUps}/>
 
             {playerWorkouts &&
-                <DataTable value={playerWorkouts}>
-                    {columns.map((column, i) => (
-                        <Column key={i} field={column.field} header={column.header}/>
-                    ))}
+                <DataTable value={playerWorkouts} sortField={"createdAt"} sortOrder={-1} >
+                    <Column field={"pushUps"} header={"Push-ups"} sortable />
+                    <Column field={"createdAt"} header={"Created At"} body={formatDate} sortable />
                 </DataTable>}
         </div>
     )
