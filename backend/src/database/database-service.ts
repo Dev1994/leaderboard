@@ -96,7 +96,19 @@ class DatabaseService {
 
     async getPlayerById(id: string) {
         try {
-            return await this.sequelize.models.Player.findByPk(id);
+            return await this.sequelize.models.Player.findByPk(id, {
+                attributes: {
+                    include: [
+                        [Sequelize.fn("COALESCE", Sequelize.fn("SUM", Sequelize.col("Workouts.pushUps")), 0), "totalPushUps"]
+                    ]
+                },
+                include: {
+                    model: this.sequelize.models.Workout,
+                    attributes: [],
+                    required: false
+                },
+                group: ["Player.id"]
+            });
         } catch (error) {
             throw error;
         }
