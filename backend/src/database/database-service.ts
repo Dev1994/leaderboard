@@ -34,10 +34,6 @@ class DatabaseService {
             name: {
                 type: DataTypes.STRING,
                 allowNull: false
-            },
-            totalPushUps: {
-                type: DataTypes.INTEGER,
-                allowNull: false
             }
         });
 
@@ -72,14 +68,6 @@ class DatabaseService {
     async sync() {
         try {
             await this.sequelize.sync({alter: true});
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async getPlayers() {
-        try {
-            return await this.sequelize.models.Player.findAll();
         } catch (error) {
             throw error;
         }
@@ -141,7 +129,6 @@ class DatabaseService {
     async addWorkout(player: any, pushUps: number) {
         try {
             const workout = await this.sequelize.models.Workout.create({date: new Date(), pushUps, playerId: player.id});
-            player.totalPushUps += pushUps;
             await player.save();
             return workout;
         } catch (error) {

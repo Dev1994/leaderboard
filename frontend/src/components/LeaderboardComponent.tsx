@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { usePlayersQuery } from "../hooks/use-players-query.ts";
+import { useEffect, useState } from "react";
 import { useAddPlayerMutation } from "../hooks/use-add-player-mutation.ts";
 import { useNavigate } from "react-router";
 import { Column } from "primereact/column";
@@ -8,6 +7,8 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
 import { SelectButton } from "primereact/selectbutton";
+import { useLeaderboardQuery } from "../hooks/use-leaderboard-query.ts";
+import { DateTime } from "luxon";
 
 const items = [
     {name: "All Time", value: 1},
@@ -17,24 +18,31 @@ const items = [
 
 export function LeaderboardComponent() {
     const [playerName, setPlayerName] = useState<string>("");
+    const [startDate, setStartDate] = useState<DateTime>(DateTime.utc().minus({years: 10}));
+    const [endDate, setEndDate] = useState<DateTime>(DateTime.utc().plus({days: 1}));
+
     const navigate = useNavigate();
     const [value, setValue] = useState(items[0].value);
 
     const addPlayerMutation = useAddPlayerMutation();
-    const {data: allTimePlayers, isLoading: isPlayersLoading} = usePlayersQuery();
+    const {data: leaderboard, isLoading: isLeaderboardLoading} = useLeaderboardQuery(startDate, endDate);
 
-    function getPlayers() {
+    useEffect(() => {
         switch (value) {
             case 1:
-                return allTimePlayers;
+                setStartDate(DateTime.utc().minus({years: 10}));
+                setEndDate(DateTime.utc().endOf("day"));
+                break;
             case 2:
-                return allTimePlayers;
+                setStartDate(DateTime.utc().startOf("week"));
+                setEndDate(DateTime.utc().endOf("week"));
+                break;
             case 3:
-                return allTimePlayers;
-            default:
-                return allTimePlayers;
+                setStartDate(DateTime.utc().startOf("day"));
+                setEndDate(DateTime.utc().endOf("day"));
+                break;
         }
-    }
+    }, [value]);
 
     return (
         <div className="flex flex-col space-y-4">
@@ -46,11 +54,11 @@ export function LeaderboardComponent() {
                     options={items}/>
 
                 {<DataTable
-                    value={getPlayers()}
+                    value={leaderboard}
                     sortField={"totalPushUps"}
                     sortOrder={-1}
                     selectionMode="single"
-                    loading={isPlayersLoading}
+                    loading={isLeaderboardLoading}
                     onSelectionChange={(e) => navigate(`/player/${e.value.id}`)}>
                     <Column header="Position" body={(_, options) => options.rowIndex + 1}></Column>
                     <Column field="name" header="Name"></Column>

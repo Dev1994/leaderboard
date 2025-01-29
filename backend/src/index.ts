@@ -21,11 +21,6 @@ app.get("/", (_: Request, res: Response) => {
     res.send("Healthy");
 });
 
-app.get("/players", async (_: Request, res: Response) => {
-    const players = await databaseService.getPlayers();
-    res.send(players);
-});
-
 app.get("/leaderboard/:start/:end", async (_: Request, res: Response) => {
     let start = _.params["start"] as string;
     let end = _.params["end"] as string;
