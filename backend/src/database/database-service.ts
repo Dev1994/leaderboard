@@ -1,4 +1,4 @@
-import {DataTypes, Sequelize} from "sequelize";
+import { DataTypes, Op, Sequelize } from "sequelize";
 
 class DatabaseService {
     public sequelize: Sequelize;
@@ -83,6 +83,27 @@ class DatabaseService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async getLeaderboard(startTime: Date, endTime: Date) {
+        return await this.sequelize.models.Player.findAll({
+            attributes: {
+                include: [
+                    [Sequelize.fn("COALESCE", Sequelize.fn("SUM", Sequelize.col("Workouts.pushUps")), 0), "totalPushUps"]
+                ]
+            },
+            include: {
+                model: this.sequelize.models.Workout,
+                attributes: [],
+                required: false,
+                where: {
+                    date: {
+                        [Op.between]: [startTime, endTime]
+                    }
+                }
+            },
+            group: ["Player.id"]
+        });
     }
 
     async getPlayerById(id: string) {

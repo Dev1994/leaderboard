@@ -1,5 +1,5 @@
-import express, {Request, Response} from 'express';
-import {databaseService} from "./database/database-service";
+import express, { Request, Response } from 'express';
+import { databaseService } from "./database/database-service";
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -23,6 +23,17 @@ app.get("/", (_: Request, res: Response) => {
 
 app.get("/players", async (_: Request, res: Response) => {
     const players = await databaseService.getPlayers();
+    res.send(players);
+});
+
+app.get("/leaderboard/:start/:end", async (_: Request, res: Response) => {
+    let start = _.params["start"] as string;
+    let end = _.params["end"] as string;
+
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+
+    const players = await databaseService.getLeaderboard(startTime, endTime);
     res.send(players);
 });
 

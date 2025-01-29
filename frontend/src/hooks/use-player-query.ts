@@ -10,7 +10,7 @@ export function usePlayerQuery(playerId: string) {
 }
 
 async function fetchPlayer(playerId: string): Promise<Player> {
-    const response = await fetch(`http://localhost:3002/players/${playerId}`, {method: "GET"});
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/players/${playerId}`, {method: "GET"});
 
     if (response.status !== 200) {
         throw new Error("Failed to fetch players");

@@ -18,7 +18,7 @@ export function useAddWorkoutMutation() {
 }
 
 async function addWorkout(player: Player, pushUps: number) {
-    const response = await fetch(`http://localhost:3002/workouts/add/${player.id}/${pushUps}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/workouts/add/${player.id}/${pushUps}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

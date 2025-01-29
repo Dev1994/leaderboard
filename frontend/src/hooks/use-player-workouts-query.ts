@@ -12,7 +12,7 @@ export function usePlayerWorkoutsQuery(player?: Player) {
 }
 
 async function fetchPlayerWorkouts(player?: Player): Promise<Workout[]> {
-    const response = await fetch(`http://localhost:3002/players/${player?.id}/workouts`, {method: "GET"});
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/players/${player?.id}/workouts`, {method: "GET"});
 
     if (response.status !== 200) {
         throw new Error("Failed to fetch players");
