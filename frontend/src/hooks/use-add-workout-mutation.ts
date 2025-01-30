@@ -1,5 +1,6 @@
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Player} from "../entities/player.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Player } from "../entities/player.ts";
+import { Workout } from "../entities/workout.ts";
 
 export function useAddWorkoutMutation() {
     const queryClient = useQueryClient();
@@ -7,16 +8,8 @@ export function useAddWorkoutMutation() {
     return useMutation({
         mutationKey: ["player"],
         mutationFn: ({player, pushUps}: { player: Player; pushUps: number }) => addWorkout(player, pushUps),
-        onSuccess: async (updatedPlayer: Player) => {
-            queryClient.setQueryData(["players"], (oldPlayers: Player[]) => {
-                return oldPlayers.map((oldPlayer) => {
-                    if (oldPlayer.id === updatedPlayer.id) {
-                        return updatedPlayer;
-                    }
-
-                    return oldPlayer;
-                });
-            });
+        onSuccess: async (workout: Workout) => {
+            await queryClient.invalidateQueries({queryKey: ["player", workout.playerId]});
         },
         onError: (error) => {
             console.error("Error incrementing push-up", error);
@@ -25,7 +18,7 @@ export function useAddWorkoutMutation() {
 }
 
 async function addWorkout(player: Player, pushUps: number) {
-    const response = await fetch(`http://localhost:3002/workouts/add/${player.id}/${pushUps}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/workouts/add/${player.id}/${pushUps}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -36,6 +29,5 @@ async function addWorkout(player: Player, pushUps: number) {
         throw new Error("Failed to add workout");
     }
 
-    const updatedPlayer: Player = await response.json();
-    return updatedPlayer;
+    return await response.json() as Workout;
 }

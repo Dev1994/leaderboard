@@ -1,11 +1,11 @@
-import {DataTypes, Sequelize} from "sequelize";
+import { DataTypes, Op, Sequelize } from "sequelize";
 
 class DatabaseService {
     public sequelize: Sequelize;
 
     constructor() {
         this.sequelize = new Sequelize("Leaderboard", "postgres", "P@ssw0rd", {
-            host: "database", // TODO: Use environment variables.
+            host: "localhost", // TODO: Use environment variables.
             port: 5432,
             dialect: "postgres",
             pool: {
@@ -33,10 +33,6 @@ class DatabaseService {
             },
             name: {
                 type: DataTypes.STRING,
-                allowNull: false
-            },
-            totalPushUps: {
-                type: DataTypes.INTEGER,
                 allowNull: false
             }
         });
@@ -77,17 +73,50 @@ class DatabaseService {
         }
     }
 
-    async getPlayers() {
+    async getLeaderboard(startTime: Date, endTime: Date) {
+        return await this.sequelize.models.Player.findAll({
+            attributes: {
+                include: [
+                    [Sequelize.fn("COALESCE", Sequelize.fn("SUM", Sequelize.col("Workouts.pushUps")), 0), "totalPushUps"]
+                ]
+            },
+            include: {
+                model: this.sequelize.models.Workout,
+                attributes: [],
+                required: false,
+                where: {
+                    date: {
+                        [Op.between]: [startTime, endTime]
+                    }
+                }
+            },
+            group: ["Player.id"]
+        });
+    }
+
+    async getPlayerById(id: string) {
         try {
-            return await this.sequelize.models.Player.findAll();
+            return await this.sequelize.models.Player.findByPk(id, {
+                attributes: {
+                    include: [
+                        [Sequelize.fn("COALESCE", Sequelize.fn("SUM", Sequelize.col("Workouts.pushUps")), 0), "totalPushUps"]
+                    ]
+                },
+                include: {
+                    model: this.sequelize.models.Workout,
+                    attributes: [],
+                    required: false
+                },
+                group: ["Player.id"]
+            });
         } catch (error) {
             throw error;
         }
     }
 
-    async getPlayerById(id: string) {
+    async getPlayerWorkouts(id: string) {
         try {
-            return await this.sequelize.models.Player.findByPk(id);
+            return await this.sequelize.models.Workout.findAll({where: {playerId: id}});
         } catch (error) {
             throw error;
         }
@@ -109,13 +138,11 @@ class DatabaseService {
         }
     }
 
-    // TODO: Not a fan of the any type here.
     async addWorkout(player: any, pushUps: number) {
         try {
-            await this.sequelize.models.Workout.create({date: new Date(), pushUps, playerId: player.id});
-            player.totalPushUps += pushUps;
+            const workout = await this.sequelize.models.Workout.create({date: new Date(), pushUps, playerId: player.id});
             await player.save();
-            return player;
+            return workout;
         } catch (error) {
             throw error;
         }

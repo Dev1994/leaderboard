@@ -1,8 +1,8 @@
-import express, {Request, Response} from 'express';
-import {databaseService} from "./database/database-service";
+import express, { Request, Response } from 'express';
+import { databaseService } from "./database/database-service";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 
 databaseService.connect();
 databaseService.defineModels();
@@ -21,10 +21,27 @@ app.get("/", (_: Request, res: Response) => {
     res.send("Healthy");
 });
 
-app.get("/players", async (_: Request, res: Response) => {
-    const players = await databaseService.getPlayers();
-    console.log(players);
+app.get("/leaderboard/:start/:end", async (_: Request, res: Response) => {
+    let start = _.params["start"] as string;
+    let end = _.params["end"] as string;
+
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+
+    const players = await databaseService.getLeaderboard(startTime, endTime);
     res.send(players);
+});
+
+app.get("/players/:id", async (req: Request, res: Response) => {
+    let id = req.params["id"] as string;
+    const players = await databaseService.getPlayerById(id);
+    res.send(players);
+});
+
+app.get("/players/:id/workouts", async (req: Request, res: Response) => {
+    let id = req.params["id"] as string;
+    const workouts = await databaseService.getPlayerWorkouts(id);
+    res.send(workouts);
 });
 
 app.post("/players/add/:name", async (req: Request, res: Response) => {
@@ -50,8 +67,8 @@ app.post("/workouts/add/:playerId/:pushUps", async (req: Request, res: Response)
         res.status(404).send("Player not found");
     }
 
-    let updated = await databaseService.addWorkout(player, pushUps);
-    res.send(updated);
+    let addedWorkout = await databaseService.addWorkout(player, pushUps);
+    res.send(addedWorkout);
 });
 
 app.listen(port, () => {
