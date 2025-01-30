@@ -6,19 +6,25 @@ import { DataTable } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
-import { SelectButton } from "primereact/selectbutton";
+import { SelectButton, SelectButtonPassThroughOptions } from "primereact/selectbutton";
 import { useLeaderboardQuery } from "../hooks/use-leaderboard-query.ts";
 import { DateTime } from "luxon";
 
 const items = [
-    {name: "All Time", value: 1},
-    {name: "Weekly", value: 2},
-    {name: "Daily", value: 3}
+    {name: "All Time", value: 0},
+    {name: "Yearly", value: 1},
+    {name: "Monthly", value: 2},
+    {name: "Weekly", value: 3},
+    {name: "Daily", value: 4}
 ];
+
+const pt: SelectButtonPassThroughOptions = {
+    button: () => ({className: "p-button-sm"}),
+}
 
 export function LeaderboardComponent() {
     const [playerName, setPlayerName] = useState<string>("");
-    const [startDate, setStartDate] = useState<DateTime>(DateTime.utc().minus({years: 10}));
+    const [startDate, setStartDate] = useState<DateTime>(DateTime.utc(2025));
     const [endDate, setEndDate] = useState<DateTime>(DateTime.utc().plus({days: 1}));
 
     const navigate = useNavigate();
@@ -29,15 +35,23 @@ export function LeaderboardComponent() {
 
     useEffect(() => {
         switch (value) {
+            case 0:
+                setStartDate(DateTime.utc(2025));
+                setEndDate(DateTime.utc().endOf("day"));
+                break;
             case 1:
-                setStartDate(DateTime.utc().minus({years: 10}));
+                setStartDate(DateTime.utc().startOf("year"));
                 setEndDate(DateTime.utc().endOf("day"));
                 break;
             case 2:
+                setStartDate(DateTime.utc().startOf("month"));
+                setEndDate(DateTime.utc().endOf("day"));
+                break;
+            case 3:
                 setStartDate(DateTime.utc().startOf("week"));
                 setEndDate(DateTime.utc().endOf("week"));
                 break;
-            case 3:
+            case 4:
                 setStartDate(DateTime.utc().startOf("day"));
                 setEndDate(DateTime.utc().endOf("day"));
                 break;
@@ -49,11 +63,12 @@ export function LeaderboardComponent() {
             <Fieldset legend={"Push-ups leaderboard"}>
                 <SelectButton
                     value={value}
+                    pt={pt}
                     onChange={(e) => setValue(e.value)}
                     optionLabel="name"
                     options={items}/>
 
-                {<DataTable
+                <DataTable
                     value={leaderboard}
                     sortField={"totalPushUps"}
                     sortOrder={-1}
@@ -63,7 +78,7 @@ export function LeaderboardComponent() {
                     <Column header="Position" body={(_, options) => options.rowIndex + 1}></Column>
                     <Column field="name" header="Name"></Column>
                     <Column field="totalPushUps" header="Push ups"></Column>
-                </DataTable>}
+                </DataTable>
             </Fieldset>
 
             <Fieldset legend={"Add player"}>
