@@ -6,9 +6,9 @@ import { DataTable } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
-import { SelectButton, SelectButtonPassThroughOptions } from "primereact/selectbutton";
 import { useLeaderboardQuery } from "../hooks/use-leaderboard-query.ts";
 import { DateTime } from "luxon";
+import { Dropdown } from "primereact/dropdown";
 
 const items = [
     {name: "All Time", value: 0},
@@ -17,10 +17,6 @@ const items = [
     {name: "Weekly", value: 3},
     {name: "Daily", value: 4}
 ];
-
-const pt: SelectButtonPassThroughOptions = {
-    button: () => ({className: "p-button-sm"}),
-}
 
 export function LeaderboardComponent() {
     const [playerName, setPlayerName] = useState<string>("");
@@ -61,12 +57,13 @@ export function LeaderboardComponent() {
     return (
         <div className="flex flex-col space-y-4">
             <Fieldset legend={"Push-ups leaderboard"}>
-                <SelectButton
-                    value={value}
-                    pt={pt}
-                    onChange={(e) => setValue(e.value)}
-                    optionLabel="name"
-                    options={items}/>
+                <div className="flex space-x-4">
+                    <Dropdown
+                        value={value}
+                        onChange={(e) => setValue(e.value)}
+                        optionLabel="name"
+                        options={items}/>
+                </div>
 
                 <DataTable
                     value={leaderboard}
