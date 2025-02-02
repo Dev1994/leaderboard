@@ -1,0 +1,29 @@
+name: Build and Install Packages
+
+on:
+  push:
+    branches:
+      - "dependabot/**"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies and Build Frontend
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./frontend
+
+      - name: Install Dependencies and Build Backend
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./backend
