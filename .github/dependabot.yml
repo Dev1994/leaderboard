@@ -9,7 +9,7 @@ updates:
     directories:
       - "./frontend"
       - "./backend"
-  - schedule:
+    schedule:
       interval: "weekly"
 
   - package-ecosystem: "npm"
