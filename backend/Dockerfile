@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM node:18.11.0-slim AS build
+FROM node:23.9.0-slim AS build
 
 # Install TypeScript globally
 RUN npm install -g typescript@4.8.4
@@ -20,7 +20,7 @@ COPY . .
 RUN tsc
 
 # Stage 2: Runtime Stage
-FROM node:18.11.0-slim
+FROM node:23.9.0-slim
 
 # Set the working directory
 WORKDIR /app
