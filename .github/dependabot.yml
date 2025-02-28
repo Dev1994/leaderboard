@@ -5,8 +5,15 @@
 
 version: 2
 updates:
+  - package-ecosystem: "docker"
+    directories:
+      - "./frontend"
+      - "./backend"
+  - schedule:
+      - interval: "weekly"
+
   - package-ecosystem: "npm"
-    directories: 
+    directories:
       - "./frontend"
       - "./backend"
     schedule:
